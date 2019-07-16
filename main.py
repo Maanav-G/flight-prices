@@ -13,8 +13,12 @@ import datetime
 import smtplib
 from email.mime.multipart import MIMEMultipart
 
+from openpyxl import Workbook
+
+
 # connect to the web broswer for automated testing
 browser = webdriver.Chrome(executable_path='/Users/maanav/chromedriver')
+
 
 # set the fligth path 
 return_ticket = "//label[@id='flight-type-roundtrip-label-hp-flight']"
@@ -114,8 +118,7 @@ def compile_data():
 
     # prices
     prices = browser.find_elements_by_xpath("//span[@data-test-id='listing-price-dollars']")
-    price_list = [value.text.split('
-    )[1] for value in prices]
+    price_list = [value.text for value in prices]
 
     # durations
     durations = browser.find_elements_by_xpath("//span[@data-test-id='duration']")
@@ -132,6 +135,8 @@ def compile_data():
     now = datetime.datetime.now()
     current_date = (str(now.year) + '-' + str(now.month) + '-' + str(now.day))
     current_time = (str(now.hour) + ':' + str(now.minute))
+    # create the excel file
+    # putting all lists side by side as columns
     current_price = 'price' + '(' + current_date + '---' + current_time + ')'
     for i in range(len(dep_times_list)):
         try:
@@ -162,3 +167,70 @@ def compile_data():
             df.loc[i, str(current_price)] = price_list[i]
         except Exception as e:
             pass
+    
+    print('Excel Sheet Created!')
+
+
+# # email credentials 
+# username: MYEMAIL
+# password: MYPASSWORD
+
+# # connect mail server 
+# def connect_mail(username, password):
+#     global server
+#     server = smtplib.SMTP('smtp.outlook.com', 587)
+#     server.ehlo()
+#     server.starttls()
+#     server.login(username, password)
+
+# # create message
+# def create_msg():
+#     global msg
+#     msg = '\nCurrent Cheapest flight:\n\nDeparture time: {}\nArrival time: {}\nAirline: {}\nFlight duration: {}\nNo. of stops: {}\nPrice: {}\n'.format(cheapest_dep_time,
+#                        cheapest_arrival_time,
+#                        cheapest_airline,
+#                        cheapest_duration,
+#                        cheapest_stops,
+#                        cheapest_price)
+
+# # send email
+# def send_email(msg):
+#     global message
+#     message = MIMEMultipart()
+#     message['Subject'] = 'Current Best flight'
+#     message['From'] = 'MYEMAIL'
+#     message['to'] = 'MYotherEMAIL'
+#     server.sendmail('MYEMAIL', 'MYotherEMAIL', msg)
+
+
+
+for i in range(8):    
+    link = 'https://www.expedia.com/'
+    browser.get(link)
+    time.sleep(5)
+    #choose flights only
+    flights_only = browser.find_element_by_xpath("//button[@id='tab-flight-tab-hp']")
+    flights_only.click()
+    ticket_chooser(return_ticket)
+    dep_country_chooser('Toronto')
+    arrival_country_chooser('Costa Rica')
+    dep_date_chooser('01', '01', '2020')
+    return_date_chooser('01', '09', '2020')
+    search()
+    compile_data()
+    #save values for email
+    # current_values = df.iloc[0]
+    # cheapest_dep_time = current_values[0]
+    # cheapest_arrival_time = current_values[1]
+    # cheapest_airline = current_values[2]
+    # cheapest_duration = current_values[3]
+    # cheapest_stops = current_values[4]
+    # cheapest_price = current_values[-1]
+    # print('run {} completed!'.format(i))
+    # create_msg()
+    # connect_mail(username,password)
+    # send_email(msg)
+    # print('Email sent!')
+    df.to_excel('flights.xlsx')
+    time.sleep(3600)
+
