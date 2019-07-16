@@ -84,3 +84,81 @@ def search():
     # time delay to let browser process
     time.sleep(15)
     print('Results ready!')
+
+
+df = pd.DataFrame()
+def compile_data():
+    global df
+    global dep_times_list
+    global arr_times_list
+    global airlines_list
+    global price_list
+    global durations_list
+    global stops_list
+    global layovers_list
+
+    # create variables for all features
+    # find all elements for the attribute 
+
+    # departure times
+    dep_times = browser.find_elements_by_xpath("//span[@data-test-id='departure-time']")
+    dep_times_list = [value.text for value in dep_times]
+    
+    # arrival times
+    arr_times = browser.find_elements_by_xpath("//span[@data-test-id='arrival-time']")
+    arr_times_list = [value.text for value in arr_times]
+
+    # airline name
+    airlines = browser.find_elements_by_xpath("//span[@data-test-id='airline-name']")
+    airlines_list = [value.text for value in airlines]
+
+    # prices
+    prices = browser.find_elements_by_xpath("//span[@data-test-id='listing-price-dollars']")
+    price_list = [value.text.split('
+    )[1] for value in prices]
+
+    # durations
+    durations = browser.find_elements_by_xpath("//span[@data-test-id='duration']")
+    durations_list = [value.text for value in durations]
+
+    # stops
+    stops = browser.find_elements_by_xpath("//span[@class='number-stops']")
+    stops_list = [value.text for value in stops]
+
+    # layovers
+    layovers = browser.find_elements_by_xpath("//span[@data-test-id='layover-airport-stops']")
+    layovers_list = [value.text for value in layovers]
+
+    now = datetime.datetime.now()
+    current_date = (str(now.year) + '-' + str(now.month) + '-' + str(now.day))
+    current_time = (str(now.hour) + ':' + str(now.minute))
+    current_price = 'price' + '(' + current_date + '---' + current_time + ')'
+    for i in range(len(dep_times_list)):
+        try:
+            df.loc[i, 'departure_time'] = dep_times_list[i]
+        except Exception as e:
+            pass
+        try:
+            df.loc[i, 'arrival_time'] = arr_times_list[i]
+        except Exception as e:
+            pass
+        try:
+            df.loc[i, 'airline'] = airlines_list[i]
+        except Exception as e:
+            pass
+        try:
+            df.loc[i, 'duration'] = durations_list[i]
+        except Exception as e:
+            pass
+        try:
+            df.loc[i, 'stops'] = stops_list[i]
+        except Exception as e:
+            pass
+        try:
+            df.loc[i, 'layovers'] = layovers_list[i]
+        except Exception as e:
+            pass
+        try:
+            df.loc[i, str(current_price)] = price_list[i]
+        except Exception as e:
+            pass
